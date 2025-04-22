@@ -1,0 +1,12 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-primary-main: #673ab7;
+  --color-secondary-main: #3d5afe;
+}
+
+.MuiDialog-root {
+  .MuiDialogContent-root {
+    padding: 16px 16px !important;
+  }
+}
