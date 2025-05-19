@@ -1,5 +1,8 @@
+import React, { useState } from 'react'
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart'
 import DeleteIcon from '@mui/icons-material/Delete'
+import TextField from '@mui/material/TextField'
+import CloseIcon from '@mui/icons-material/Close'
 import {
   Avatar,
   Box,
@@ -22,8 +25,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
-import { productService } from 'services'
+import { orderService, productService } from 'services'
 import Zoom from 'react-medium-image-zoom'
 import 'react-medium-image-zoom/dist/styles.css'
 
@@ -31,6 +33,9 @@ const Home = () => {
   const [cart, setCart] = useState<CartItem[]>([])
   const [open, setOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+  const [orderOpen, setOrderOpen] = useState(false)
+  const [shippingAddress, setShippingAddress] = useState('')
+  const [billingAddress, setBillingAddress] = useState('')
 
   const { data } = useQuery({
     queryFn: async () => await productService.fetchProducts(),
@@ -69,6 +74,37 @@ const Home = () => {
   const handleCloseDetail = () => {
     setOpen(false)
     setSelectedProduct(null)
+  }
+
+  const handleOrder = () => {
+    setOrderOpen(true)
+  }
+
+  const handleOrderClose = () => {
+    setOrderOpen(false)
+    setShippingAddress('')
+    setBillingAddress('')
+  }
+
+  const handleOrderSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      await orderService.createOrder({
+        total_amount: totalPrice,
+        shipping_address: shippingAddress,
+        billing_address: billingAddress,
+        products: cart.map(item => ({
+          id: item.id,
+          quantity: item.quantity,
+        })),
+      })
+      alert('Đặt hàng thành công!')
+      handleOrderClose()
+      setCart([])
+    } catch (err) {
+      console.log(err)
+      alert('Đặt hàng thất bại!')
+    }
   }
 
   return (
@@ -139,43 +175,53 @@ const Home = () => {
         {cart.length === 0 ? (
           <Typography color="text.secondary">Chưa có sản phẩm nào</Typography>
         ) : (
-          <List>
-            {cart.map((item) => (
-              <ListItem
-                key={item.id}
-                alignItems="flex-start"
-                secondaryAction={
-                  <IconButton edge="end" color="error" onClick={() => removeFromCart(item.id)}>
-                    <DeleteIcon />
-                  </IconButton>
-                }
-              >
-                <ListItemAvatar>
-                  <Avatar
-                    variant="rounded"
-                    src={item.image}
-                    alt={item.name}
-                    sx={{ width: 56, height: 56, mr: 2 }}
-                  />
-                </ListItemAvatar>
-                <ListItemText
-                  primary={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography fontWeight={600}>{item.name}</Typography>
+          <>
+            <List>
+              {cart.map((item) => (
+                <ListItem
+                  key={item.id}
+                  alignItems="flex-start"
+                  secondaryAction={
+                    <IconButton edge="end" color="error" onClick={() => removeFromCart(item.id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  }
+                >
+                  <ListItemAvatar>
+                    <Avatar
+                      variant="rounded"
+                      src={item.image}
+                      alt={item.name}
+                      sx={{ width: 56, height: 56, mr: 2 }}
+                    />
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography fontWeight={600}>{item.name}</Typography>
+                        <Typography color="text.secondary" fontSize={14}>
+                          x{item.quantity}
+                        </Typography>
+                      </Box>
+                    }
+                    secondary={
                       <Typography color="text.secondary" fontSize={14}>
-                        x{item.quantity}
+                        {(item.price * item.quantity).toLocaleString()}₫ ({item.price.toLocaleString()}₫/sp)
                       </Typography>
-                    </Box>
-                  }
-                  secondary={
-                    <Typography color="text.secondary" fontSize={14}>
-                      {(item.price * item.quantity).toLocaleString()}₫ ({item.price.toLocaleString()}₫/sp)
-                    </Typography>
-                  }
-                />
-              </ListItem>
-            ))}
-          </List>
+                    }
+                  />
+                </ListItem>
+              ))}
+            </List>
+            <Button
+              variant="contained"
+              color="success"
+              sx={{ mt: 2, width: '100%' }}
+              onClick={handleOrder}
+            >
+              Xác nhận đặt hàng
+            </Button>
+          </>
         )}
       </Paper>
 
@@ -243,6 +289,53 @@ const Home = () => {
             </DialogContent>
           </>
         )}
+      </Dialog>
+
+      {/* Popup xác nhận đặt hàng */}
+      <Dialog open={orderOpen} onClose={handleOrderClose} maxWidth="xs" fullWidth>
+        <DialogTitle>
+          Xác nhận đặt hàng
+          <IconButton
+            aria-label="close"
+            onClick={handleOrderClose}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <Box component="form" onSubmit={handleOrderSubmit} sx={{ mt: 1 }}>
+            <TextField
+              label="Địa chỉ giao hàng"
+              value={shippingAddress}
+              onChange={(e) => setShippingAddress(e.target.value)}
+              fullWidth
+              required
+              margin="normal"
+            />
+            <TextField
+              label="Địa chỉ hóa đơn"
+              value={billingAddress}
+              onChange={(e) => setBillingAddress(e.target.value)}
+              fullWidth
+              required
+              margin="normal"
+            />
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              sx={{ mt: 2, width: '100%' }}
+            >
+              Đặt hàng
+            </Button>
+          </Box>
+        </DialogContent>
       </Dialog>
     </Box>
   )

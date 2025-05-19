@@ -1,4 +1,4 @@
-import { ArrowDropDown, ArrowRight, Home } from '@mui/icons-material'
+import { ArrowDropDown, ArrowRight, Home, Shop } from '@mui/icons-material'
 import {
   alpha,
   Box,
@@ -103,6 +103,7 @@ const AppMenu = () => {
   return (
     <List className="flex flex-col gap-2">
       <MenuItem {...privateRoute.home} icon={<Home />} />
+      <MenuItem {...privateRoute.order} icon={<Shop />} />
     </List>
   )
 }

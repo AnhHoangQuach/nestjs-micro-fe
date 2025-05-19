@@ -1,4 +1,4 @@
-import { client } from './axios'
+import { client } from './axios';
 
 const fetchProducts = (): Promise<ProductListResponse> =>
   client.get(`/products`);
