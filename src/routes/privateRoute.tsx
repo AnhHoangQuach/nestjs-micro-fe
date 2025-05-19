@@ -6,8 +6,7 @@ const privateRoute = {
     component: Home,
     path: '/',
     url: '/',
-  },
-  
+  },  
 }
 
 export default privateRoute

@@ -1,29 +1,36 @@
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart'
 import DeleteIcon from '@mui/icons-material/Delete'
 import {
+  Avatar,
   Box,
   Button,
   Card,
   CardActions,
   CardContent,
   CardMedia,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   Divider,
   Grid,
   IconButton,
   List,
   ListItem,
   ListItemAvatar,
-  Avatar,
   ListItemText,
-  Typography,
   Paper,
+  Typography,
 } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { productService } from 'services'
+import Zoom from 'react-medium-image-zoom'
+import 'react-medium-image-zoom/dist/styles.css'
 
 const Home = () => {
   const [cart, setCart] = useState<CartItem[]>([])
+  const [open, setOpen] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
   const { data } = useQuery({
     queryFn: async () => await productService.fetchProducts(),
@@ -54,6 +61,16 @@ const Home = () => {
   const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0)
   const totalPrice = cart.reduce((sum, item) => sum + item.quantity * item.price, 0)
 
+  // Xử lý mở popup xem chi tiết
+  const handleOpenDetail = (product: Product) => {
+    setSelectedProduct(product)
+    setOpen(true)
+  }
+  const handleCloseDetail = () => {
+    setOpen(false)
+    setSelectedProduct(null)
+  }
+
   return (
     <Box sx={{ display: 'flex', gap: 4, mt: 4, flexWrap: 'wrap', alignItems: 'flex-start' }}>
       {/* Product List */}
@@ -69,7 +86,16 @@ const Home = () => {
                   component="img"
                   image={product.image}
                   alt={product.name}
-                  sx={{ height: 180, objectFit: 'cover', borderRadius: 2, mb: 1 }}
+                  sx={{
+                    height: 180,
+                    objectFit: 'cover',
+                    borderRadius: 2,
+                    mb: 1,
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s',
+                    '&:hover': { transform: 'scale(1.05)' },
+                  }}
+                  onClick={() => handleOpenDetail(product)}
                 />
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Typography variant="h6" noWrap>
@@ -152,6 +178,72 @@ const Home = () => {
           </List>
         )}
       </Paper>
+
+      {/* Popup xem chi tiết sản phẩm */}
+      <Dialog open={open} onClose={handleCloseDetail} maxWidth="sm" fullWidth>
+        {selectedProduct && (
+          <>
+            <DialogTitle>{selectedProduct.name}</DialogTitle>
+            <DialogContent sx={{ textAlign: 'center' }}>
+              <Box
+                sx={{
+                  width: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  mb: 2,
+                }}
+              >
+                <Zoom>
+                  <img
+                    src={selectedProduct.image}
+                    alt={selectedProduct.name}
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: 400,
+                      borderRadius: 8,
+                      cursor: 'zoom-in',
+                    }}
+                  />
+                </Zoom>
+              </Box>
+              <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
+                {selectedProduct.price.toLocaleString()}₫
+              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 2 }}>
+                <Button
+                  variant="contained"
+                  startIcon={<AddShoppingCartIcon />}
+                  onClick={() => addToCart(selectedProduct)}
+                >
+                  Thêm vào giỏ
+                </Button>
+                {(() => {
+                  const found = cart.find((item) => item.id === selectedProduct.id)
+                  return found && found.quantity > 0 ? (
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      startIcon={<DeleteIcon />}
+                      onClick={() => removeFromCart(selectedProduct.id)}
+                    >
+                      Xoá bớt
+                    </Button>
+                  ) : null
+                })()}
+              </Box>
+              {(() => {
+                const found = cart.find((item) => item.id === selectedProduct.id)
+                return found && found.quantity > 0 ? (
+                  <Typography color="text.secondary">
+                    Đang có trong giỏ: <b>{found.quantity}</b>
+                  </Typography>
+                ) : null
+              })()}
+            </DialogContent>
+          </>
+        )}
+      </Dialog>
     </Box>
   )
 }
