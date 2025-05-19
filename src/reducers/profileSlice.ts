@@ -12,7 +12,7 @@ export const profileSlice = createSlice({
       return { ...state, ...payload, isLoggedIn: true }
     },
     signOut: () => {
-      const profile = { isLoggedIn: false } as ProfileType
+      const profile = { isLoggedIn: false }
       return profile
     },
   },

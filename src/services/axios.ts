@@ -5,10 +5,10 @@ import { signOut } from 'reducers/profileSlice'
 import { store } from 'reducers/store'
 
 const beforeRequest = (config: InternalAxiosRequestConfig) => {
-  const { accessToken } = store.getState().profile
-  if (accessToken) {
+  const { token } = store.getState().profile
+  if (token) {
     Object.assign(config.headers, {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `${token}`,
     })
   }
   if (config.data instanceof FormData) {
@@ -38,8 +38,8 @@ const onError = async (error: AxiosError<ErrorResponse, string>) => {
   return Promise.reject(error)
 }
 
-const client = axios.create({ baseURL: API_URL + '/api' })
+const client = axios.create({ baseURL: API_URL })
 client.interceptors.request.use(beforeRequest)
-client.interceptors.response.use(({ data }) => data.data, onError)
+client.interceptors.response.use(({ data }) => data, onError)
 
 export { client }

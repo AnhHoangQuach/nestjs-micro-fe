@@ -1,9 +1,11 @@
-import { Menu as MenuIcon } from '@mui/icons-material'
-import { AppBar, Box, Divider, Drawer, IconButton, Toolbar } from '@mui/material'
+import { Logout, Menu as MenuIcon } from '@mui/icons-material'
+import { AppBar, Avatar, Box, Button, Divider, Drawer, IconButton, Toolbar, Tooltip } from '@mui/material'
 import { AppMenu, AppBreadcrumb } from 'containers'
 import { useResponsive } from 'hooks'
 import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { Link, useLocation } from 'react-router-dom'
+import { profileSelector, signOut } from 'reducers/profileSlice'
 import { privateRoute } from 'routes'
 
 const AppHeader = () => {
@@ -11,6 +13,8 @@ const AppHeader = () => {
   const { isDesktop, isMobile } = useResponsive()
 
   const [openDrawer, setOpenDrawer] = useState(false)
+  const { user, isLoggedIn } = useSelector(profileSelector);
+  const dispatch = useDispatch()
 
   useEffect(() => {
     setOpenDrawer(false)
@@ -42,6 +46,18 @@ const AppHeader = () => {
             </IconButton>
           )}
           <Box className="flex-1">{!isMobile && <AppBreadcrumb />}</Box>
+          {isLoggedIn ? (
+            <div className="flex-1 flex items-center gap-3 justify-end">
+              <Avatar className="mr-2">{user?.name.charAt(0).toUpperCase()}</Avatar>
+              <Tooltip title="Đăng xuất">
+                <IconButton onClick={() => dispatch(signOut())}>
+                  <Logout />
+                </IconButton>
+              </Tooltip>
+            </div>
+          ) : (
+            <Button variant="outlined">Login</Button>
+          )}
         </Toolbar>
       </AppBar>
     </>

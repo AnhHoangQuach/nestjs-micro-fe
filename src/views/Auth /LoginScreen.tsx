@@ -9,10 +9,10 @@ import { authRoute } from 'routes'
 import { authService } from 'services'
 
 const LoginScreen = () => {
-  const { control, handleSubmit } = useForm<LoginBody>({
+  const { control, handleSubmit } = useForm({
     mode: 'onChange',
     defaultValues: {
-      username: '',
+      email: '',
       password: '',
     },
   })
@@ -22,8 +22,10 @@ const LoginScreen = () => {
 
   const handleClickSubmit = () => {
     handleSubmit(async (values) => {
-      const result = await mutateAsync(values)
-      dispatch(signIn(result))
+      const { data: dataLogin } = await mutateAsync(values)
+      dispatch(signIn(dataLogin))
+      const { data: dataUser } = await authService.getUser()
+      dispatch(signIn(dataUser))
     })()
   }
 
@@ -31,17 +33,17 @@ const LoginScreen = () => {
     <Container maxWidth="sm">
       <Paper className="flex flex-col gap-6 p-8">
         <Controller
-          name="username"
+          name="email"
           control={control}
           rules={{
-            required: 'Username không được để trống',
+            required: 'Email không được để trống',
           }}
           render={({ field, fieldState: { error } }) => (
             <TextField
               {...field}
               fullWidth
               variant="standard"
-              label="Username"
+              label="Email"
               error={!!error}
               helperText={error?.message}
             />

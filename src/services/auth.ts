@@ -1,9 +1,11 @@
 import { client } from './axios'
 
-const login = (body: LoginBody): Promise<LoginResponse> => client.post(`/auth/login`, body)
-const register = (body: RegisterBody): Promise<User> => client.post(`/auth/register`, body)
+const login = (body: LoginBody): Promise<LoginResponse> => client.post(`/users/login`, body)
+const register = (body: RegisterBody) => client.post(`/users`, body)
+const getUser = (): Promise<GetUserResponse> => client.get(`/users`)
 
 export default {
   login,
   register,
+  getUser
 }

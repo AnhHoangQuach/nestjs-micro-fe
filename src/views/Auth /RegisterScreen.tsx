@@ -8,15 +8,14 @@ import { authRoute } from 'routes'
 import { authService } from 'services'
 
 const RegisterScreen = () => {
-  const { control, watch, handleSubmit } = useForm<RegisterBody>({
+  const { control, handleSubmit } = useForm({
     mode: 'onChange',
     defaultValues: {
-      username: '',
+      name: '',
+      email: '',
       password: '',
-      passwordConfirm: '',
     },
   })
-  const { password } = watch()
   const navigate = useNavigate()
 
   const { mutateAsync, isPending } = useMutation({ mutationFn: authService.register })
@@ -34,18 +33,36 @@ const RegisterScreen = () => {
     <Container maxWidth="sm">
       <Paper className="flex flex-col gap-6 p-8">
         <Controller
-          name="username"
+          name="name"
           defaultValue=""
           control={control}
           rules={{
-            required: 'Username không được để trống',
+            required: 'Tên không được để trống',
           }}
           render={({ field, fieldState: { error } }) => (
             <TextField
               {...field}
               fullWidth
               variant="standard"
-              label="Username"
+              label="Tên"
+              error={!!error}
+              helperText={error?.message}
+            />
+          )}
+        />
+        <Controller
+          name="email"
+          defaultValue=""
+          control={control}
+          rules={{
+            required: 'Email không được để trống',
+          }}
+          render={({ field, fieldState: { error } }) => (
+            <TextField
+              {...field}
+              fullWidth
+              variant="standard"
+              label="Email"
               error={!!error}
               helperText={error?.message}
             />
@@ -65,27 +82,6 @@ const RegisterScreen = () => {
               fullWidth
               variant="standard"
               label="Mật khẩu"
-              error={!!error}
-              helperText={error?.message}
-            />
-          )}
-        />
-        <Controller
-          name="passwordConfirm"
-          defaultValue=""
-          control={control}
-          rules={{
-            required: 'Mật khẩu không hợp lệ',
-            validate: {
-              match: (value) => value === password || 'Mật khẩu không khớp',
-            },
-          }}
-          render={({ field, fieldState: { error } }) => (
-            <InputPassword
-              {...field}
-              fullWidth
-              variant="standard"
-              label="Xác nhận mật khẩu"
               error={!!error}
               helperText={error?.message}
             />

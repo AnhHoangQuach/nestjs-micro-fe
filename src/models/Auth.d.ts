@@ -1,24 +1,29 @@
 type LoginBody = {
   password: string
-  username: string
+  email: string
 }
 
 type LoginResponse = {
-  accessToken?: string
+  data: {
+    token?: string
+  }
 }
 
 type ProfileType = LoginResponse & {
   id?: string
-  username?: string
-  role?: string
+  user?: User
   isLoggedIn?: boolean
 }
 
 type RegisterBody = LoginBody & {
-  passwordConfirm: string
+  name: string;
 }
 
 type User = DBTimeAudit & {
-  username: string
-  role: string
+  email: string
+  name: string
+}
+
+type GetUserResponse = {
+  data: User
 }
