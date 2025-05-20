@@ -1,4 +1,4 @@
-import { ArrowDropDown, ArrowRight, Home, Shop } from '@mui/icons-material'
+import { ArrowDropDown, ArrowRight, Home, NewReleases, Shop } from '@mui/icons-material'
 import {
   alpha,
   Box,
@@ -10,7 +10,9 @@ import {
   styled,
 } from '@mui/material'
 import { JSX, useState } from 'react'
+import { useSelector } from 'react-redux'
 import { Link, useLocation } from 'react-router-dom'
+import { profileSelector } from 'reducers/profileSlice'
 import { privateRoute } from 'routes'
 
 const StyledListItem = styled(ListItemButton)(({ theme }) => ({
@@ -100,10 +102,12 @@ const MenuItem = ({ icon, items, name, path }: MenuItemProps) => {
 }
 
 const AppMenu = () => {
+  const { user } = useSelector(profileSelector)
   return (
     <List className="flex flex-col gap-2">
       <MenuItem {...privateRoute.home} icon={<Home />} />
       <MenuItem {...privateRoute.order} icon={<Shop />} />
+      {user?.role === 'admin' && <MenuItem {...privateRoute.product} icon={<NewReleases />} />}
     </List>
   )
 }

@@ -22,6 +22,7 @@ type RegisterBody = LoginBody & {
 type User = DBTimeAudit & {
   email: string
   name: string
+  role: string;
 }
 
 type GetUserResponse = {

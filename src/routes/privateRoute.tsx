@@ -1,5 +1,6 @@
 import { Home } from 'views/Home'
 import { Order } from 'views/Order'
+import { Product } from 'views/Product'
 
 const privateRoute = {
   home: {
@@ -13,7 +14,13 @@ const privateRoute = {
     component: Order,
     path: '/order',
     url: '/order',
-  },  
+  },
+  product: {
+    name: 'Tạo sản phẩm',
+    component: Product,
+    path: '/product',
+    url: '/product',
+  },
 }
 
 export default privateRoute
